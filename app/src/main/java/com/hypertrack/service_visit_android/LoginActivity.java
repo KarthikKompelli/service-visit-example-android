@@ -12,13 +12,18 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
+import com.hypertrack.lib.models.UserParams;
 import com.hypertrack.service_visit_android.util.BaseActivity;
 import com.hypertrack.service_visit_android.util.SharedPreferenceStore;
+
+import java.util.UUID;
 
 /**
  * This class can be used to enable Driver's Login flow in your app. This Activity consists of optional
@@ -85,7 +90,7 @@ public class LoginActivity extends BaseActivity {
 
         // Check for Location settings
         if (!HyperTrack.checkLocationServices(this)) {
-            HyperTrack.requestLocationServices(this, null);
+            HyperTrack.requestLocationServices(this);
         }
 
         // Location Permissions and Settings have been enabled
@@ -106,7 +111,8 @@ public class LoginActivity extends BaseActivity {
         final String phoneNumber = driverPhoneNumberText.getText().toString();
 
         // PhoneNumber is used as the lookup_id here but you can specify any other entity as the lookup_id.
-        final String lookupId = phoneNumber;
+        final String lookupId = HTTextUtils.isEmpty(phoneNumber)? UUID.randomUUID().toString():phoneNumber;
+
 
         /**
          * Create a User on HyperTrack Server here to login your driver & configure HyperTrack SDK with
@@ -119,7 +125,9 @@ public class LoginActivity extends BaseActivity {
          * Specify Driver name, phone number and a lookup_id denoting your driver's internal id.
          * PhoneNumber is used as the lookup_id here but you can specify any other entity as the lookup_id.
          */
-        HyperTrack.getOrCreateUser(name, phoneNumber, lookupId, new HyperTrackCallback() {
+        UserParams userParams = new UserParams().setName(name).setPhone(phoneNumber).setLookupId(lookupId);
+
+        HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse successResponse) {
                 // Hide Login Button loader
@@ -151,7 +159,7 @@ public class LoginActivity extends BaseActivity {
     private void onDriverLoginSuccess() {
 
         // To start tracking your driver, call HyperTrack's startTracking API
-        HyperTrack.startTracking(new HyperTrackCallback() {
+        HyperTrack.startMockTracking(new LatLng(28.56217, 77.16160),new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse successResponse) {
                 // Hide Login Button loader
