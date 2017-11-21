@@ -83,11 +83,11 @@ public class MainActivity extends BaseActivity {
                 mProgressDialog.show();
 
                 /**
-                 * You can specify a lookup_id to Actions which maps to your internal id of that
+                 * You can specify a collection_id to Actions which maps to your internal id of that
                  * service visit. This will help you search for the service visit on
                  * HyperTrack dashboard, and get custom views for the specific service visit.
                  *
-                 * @NOTE: A randomly generated UUID is used as the lookup_id here. This will be the actual
+                 * @NOTE: A randomly generated UUID is used as the collection_id here. This will be the actual
                  * orderID in your case which will be fetched from either your server or generated locally.
                  */
                 final String orderID = UUID.randomUUID().toString();
@@ -143,7 +143,7 @@ public class MainActivity extends BaseActivity {
      *
      * @param orderID Internal order_id which maps to the current job being performed
      */
-    private void createActionsForJob(String orderID) {
+    private void createActionsForJob(final String orderID) {
         /**
          * Construct a place object for Action's expected place
          *
@@ -156,13 +156,13 @@ public class MainActivity extends BaseActivity {
 
         /**
          * Create ActionParams object specifying the Visit Action parameters including ExpectedPlace,
-         * ExpectedAt time and Lookup_id.
+         * ExpectedAt time and order Id as collection Id.
          */
         ActionParams visitTypeActionParams = new ActionParamsBuilder()
                 .setExpectedPlace(expectedPlace)
                 .setExpectedAt(new Date())
                 .setType(Action.ACTION_TYPE_VISIT)
-                .setLookupId(orderID)
+                .setCollectionId(orderID)
                 .build();
 
         /**
@@ -188,9 +188,9 @@ public class MainActivity extends BaseActivity {
                 /**
                  * Yay! VISIT Type Action has been successfully created and assigned to current user.
                  * Now, we need to createAndAssignAction for STOPOVER Type Action using same
-                 * expected place and same lookup_id.
+                 * expected place and same order Id as collection Id.
                  */
-                assignStopoverActionForJob(action.getExpectedPlace().getId(), action.getLookupId());
+                assignStopoverActionForJob(action.getExpectedPlace().getId(), orderID);
             }
 
             @Override
@@ -206,7 +206,7 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * This method creates and assigns STOPOVER type action using given expectedPlaceId and lookup_id
+     * This method creates and assigns STOPOVER type action using given expectedPlaceId and collection_id
      *
      * @param expectedPlaceID ExpectedPlace Id created on HyperTrack API Server for the VISIT type action.
      * @param orderId         Internal order_id which maps to the current job being performed.
@@ -214,13 +214,13 @@ public class MainActivity extends BaseActivity {
     private void assignStopoverActionForJob(String expectedPlaceID, final String orderId) {
         /**
          * Create ActionParams object specifying the Stopover Action parameters including
-         * already created ExpectedPlaceId, ExpectedAt time and same Lookup_id as for the Visit type action.
+         * already created ExpectedPlaceId, ExpectedAt time and same collection_id as for the Visit type action.
          */
         ActionParams stopOverTypeActionParams = new ActionParamsBuilder()
                 .setExpectedPlaceId(expectedPlaceID)
                 .setExpectedAt(new Date())
                 .setType(Action.ACTION_TYPE_STOPOVER)
-                .setLookupId(orderId)
+                .setCollectionId(orderId)
                 .build();
 
         /**
@@ -268,7 +268,7 @@ public class MainActivity extends BaseActivity {
         Toast.makeText(MainActivity.this, R.string.main_logout_success_msg, Toast.LENGTH_SHORT).show();
 
         // Stop tracking a user
-        HyperTrack.stopTracking();
+        HyperTrack.stopMockTracking();
 
         // Clear Driver Session here
         SharedPreferenceStore.clearIDs(this);
